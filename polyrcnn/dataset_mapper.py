@@ -150,7 +150,9 @@ def annotations_to_instances(annos, image_size, num_corners):
 
     if len(annos):
         cor_cls_img = [obj["cor_cls_poly"] for obj in annos]
-        cor_cls_img = torch.tensor(cor_cls_img, dtype=torch.int32)
+        # cor_cls_img = torch.tensor(cor_cls_img, dtype=torch.int32)
+        # RS: avoid torch warning that list of np arrays to tensor is slow
+        cor_cls_img = torch.tensor(np.array(cor_cls_img), dtype=torch.int32)
         target.gt_cor_cls_img = cor_cls_img  # torch.Size([N, num_corners]), torch.int32
     else:
         target.gt_cor_cls_img = torch.zeros((0, num_corners), dtype=torch.int32)

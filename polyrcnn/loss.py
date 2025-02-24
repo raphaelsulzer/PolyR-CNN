@@ -251,9 +251,10 @@ class SetCriterion(nn.Module):
                         # Intermediate masks losses are too costly to compute, we ignore them.
                         continue
                     kwargs = {}
-                    if loss == 'labels':
-                        # Logging is enabled only for the last layer
-                        kwargs = {'log': False}
+                    # RS: self.loss_labels does not accept a log keyword arg
+                    # if loss == 'labels':
+                    #     # Logging is enabled only for the last layer
+                    #     kwargs = {'log': False}
                     l_dict = self.get_loss(loss, aux_outputs, targets, indices, **kwargs)
                     l_dict = {k + f'_{i}': v for k, v in l_dict.items()}
                     losses.update(l_dict)

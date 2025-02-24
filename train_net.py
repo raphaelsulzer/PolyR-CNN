@@ -144,9 +144,11 @@ def main(args):
     # - `dataset_name`: The name of the dataset to register.
     # - `TRAIN_JSON`: Path to the COCO-format annotation file for the dataset.
     # - `TRAIN_PATH`: Path to the folder containing the dataset images.
-    register_my_dataset(dataset_name="aicrowd_train",
-                        TRAIN_JSON="../../data/aicrowd/train/annotation_preprocessed.json",
-                        TRAIN_PATH="../../data/aicrowd/train/images")
+    data_path = "/data/rsulzer/hisup_data/lidarpoly"
+    # data_path = "/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512"
+    register_my_dataset(dataset_name="inria_train",
+                        TRAIN_JSON=os.path.join(data_path,"annotations_polyrcnn_train.json"),
+                        TRAIN_PATH=data_path)
     if args.eval_only:
         model = Trainer.build_model(cfg)
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
@@ -164,6 +166,7 @@ def main(args):
 
 if __name__ == "__main__":
     args = default_argument_parser().parse_args()
+    args.config_file = "configs/polyrcnn.swinbase.inria.yaml"
     print("Command Line Args:", args)
     launch(
         main,

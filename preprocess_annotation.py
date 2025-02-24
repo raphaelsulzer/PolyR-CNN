@@ -246,17 +246,33 @@ def parse_args():
     Parse command-line arguments.
     """
     parser = argparse.ArgumentParser(description="Preprocess COCO-format annotations for polygon padding and cleaning.")
-    parser.add_argument('--json_path', required=True, help="Path to the input annotation file (JSON format).")
-    parser.add_argument('--save_path', required=True, help="Path to save the preprocessed annotation file.")
+    # parser.add_argument('--json_path',
+    #                     default='/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512',
+    #                     help="Path to the input annotation file (JSON format).")
+    # parser.add_argument('--save_path',
+    #                     default='/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512',
+    #                     help="Path to save the preprocessed annotation file.")
     parser.add_argument('--is_training', type=bool, default=True,
                         help="Whether the dataset is for training (default: True).")
-    parser.add_argument('--num_corners', type=int, required=True, help="Number of vertices to sample from the polygon.")
+    parser.add_argument('--num_corners', type=int,
+                        default = 96,
+                        help="Number of vertices to sample from the polygon.")
 
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = parse_args()
+
+    data_path = "/data/rsulzer/hisup_data/lidarpoly"
+    # data_path = "/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512"
+
+    split = "train"
+    # split = "val"
+    args.json_path = os.path.join(data_path,f"annotations_{split}.json")
+    args.save_path = os.path.join(data_path,f"annotations_polyrcnn_{split}.json")
+
+
     preprocess_annotation(
         json_path=args.json_path,
         save_path=args.save_path,
