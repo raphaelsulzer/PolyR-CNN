@@ -111,6 +111,14 @@ class PolyRCNNDatasetMapper:
             # - instances.gt_masks: <torch.Tensor>, torch.int32, shape (N, num_corners*2), preprocessed and uniformly sampled polygon vertices
             dataset_dict["instances"] = filter_empty_instances(instances)
 
+        # from lidar_poly_dataloader.utils import plot_polygons
+        #
+        # M = int(dataset_dict['instances'].gt_masks.shape[1]/2)
+        # pts = dataset_dict['instances'].gt_masks
+        # pts = pts.reshape(dataset_dict['instances'].gt_masks.shape[0], M, 2)
+        #
+        # plot_polygons(pts, image, pointsize=1, linewidth=0.5)
+
         return dataset_dict
 
 # The following functions are a rewritten version of the original functions from detectron2.

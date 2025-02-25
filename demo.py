@@ -52,6 +52,7 @@ def get_parser():
     # This ensures that 'args.input' is always a list of file paths, making it flexible to accept
     # single images, multiple images, or patterns matching multiple images.
     parser.add_argument("--output", required=True, help="Directory to save the output visualizations. Will create the directory if it doesn't exist.")
+    # parser.add_argument("--confidence-threshold", type=float, default=0.5, help="Confidence threshold for predictions")
     parser.add_argument("--confidence-threshold", type=float, default=0.5, help="Confidence threshold for predictions")
     parser.add_argument("--corner-threshold", type=float, default=0.2, help="Threshold for vertex corner classification")
     parser.add_argument("--nms", action="store_true", help="Whether to apply NMS to polygon vertices.")
@@ -326,7 +327,12 @@ def main():
     cfg = setup_cfg(args)
     model = build_model(cfg)
     model.eval()
-    DetectionCheckpointer(model).load(cfg.MODEL.WEIGHTS)
+    with open("./output/last_checkpoint","rb") as f:
+        last_checkpoint = f.readline().decode('utf-8')
+
+    last_checkpoint = os.path.join("output",last_checkpoint)
+    print(f"Load model weights from {last_checkpoint}")
+    DetectionCheckpointer(model).load(last_checkpoint)
 
     # If the input contains a single glob pattern (e.g., "*.jpg"),
     # expand it into a list of matching file paths.

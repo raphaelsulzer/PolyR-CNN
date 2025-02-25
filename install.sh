@@ -2,7 +2,7 @@
 set -e
 
 # Local variables
-ENV_NAME=polyrcnn
+ENV_NAME=polyrcnn2
 PYTHON=3.11.11
 
 # Installation script for Anaconda3 environments
@@ -55,19 +55,36 @@ conda create -y --name $ENV_NAME python=$PYTHON > /dev/null 2>&1
 source ${CONDA_DIR}/etc/profile.d/conda.sh
 conda activate ${ENV_NAME}
 
-# dependencies
+########## PIP VERSION IS NOW WORKING #############
+### PIP VERSION
+#pip install -r requirements_ori.txt
+#pip install requests
+#pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#python -m pip install detectron2 -f   https://dl.fbaipublicfiles.com/detectron2/wheels/cu118/torch2.5.1/index.html
+#pip install copclib
+
+### CONDA VERSION
+## dependencies
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia -y
 conda install conda-forge::detectron2 -y
 conda install conda-forge::fvcore -y
 conda install geos -y
-pip install -r requirements.txt
-#pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+conda install conda-forge::wandb -y
+
+conda install conda-forge::tqdm -y
+conda install conda-forge::matplotlib -y
+conda install conda-forge::pycocotools -y
+conda install anaconda::scikit-image -y
+conda install conda-forge::opencv -y
+conda install conda-forge::timm -y
+
+#pip install -r requirements.txt
+##pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
 python -c "import torch; torch.cuda.is_available()"
 RETVAL=$?  # Capture return code
 if [ $RETVAL -eq 0 ]; then
     echo "PyTorch cuda is working!"
 fi
-
-
 
 # problem with torch:tms? do this:
 # https://github.com/huggingface/diffusers/issues/8958#issuecomment-2253055261
