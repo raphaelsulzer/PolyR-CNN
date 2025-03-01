@@ -52,6 +52,7 @@ def get_parser():
     # This ensures that 'args.input' is always a list of file paths, making it flexible to accept
     # single images, multiple images, or patterns matching multiple images.
     parser.add_argument("--output", required=True, help="Directory to save the output visualizations. Will create the directory if it doesn't exist.")
+    # parser.add_argument("--confidence-threshold", type=float, default=0.5, help="Confidence threshold for predictions")
     parser.add_argument("--confidence-threshold", type=float, default=0.5, help="Confidence threshold for predictions")
     parser.add_argument("--corner-threshold", type=float, default=0.2, help="Threshold for vertex corner classification")
     parser.add_argument("--nms", action="store_true", help="Whether to apply NMS to polygon vertices.")
@@ -76,7 +77,7 @@ def setup_cfg(args):
     return cfg
 
 
-def visualize_polygons(img, polygons):
+def visualize_polygons(img, polygons, linewidth=4):
     """
     Visualize polygons on an image with distinct colors for each polygon.
 
@@ -92,7 +93,17 @@ def visualize_polygons(img, polygons):
         polygon = np.array(polygon).flatten()
         polygon = np.round(polygon).astype(np.int32).reshape((-1, 1, 2)) * 3  # enlarge polygon for visualization
         col = colors[i % len(colors)]
-        img = cv2.polylines(img, [polygon], True, col, 2)
+        
+        # Create an overlay image
+        overlay = img.copy()
+
+        # Fill polygon with the color
+        cv2.fillPoly(overlay, [polygon], col)
+
+        # Blend the overlay with the original image
+        img = cv2.addWeighted(overlay, 0.5, img, 0.5, 0)
+        
+        img = cv2.polylines(img, [polygon], True, col, thickness=linewidth)
         polygon = polygon.reshape((-1, 2))
         for cor in polygon:
             img = cv2.circle(img, (cor[0], cor[1]), 4, col, -1)
@@ -326,7 +337,12 @@ def main():
     cfg = setup_cfg(args)
     model = build_model(cfg)
     model.eval()
-    DetectionCheckpointer(model).load(cfg.MODEL.WEIGHTS)
+    with open("./output/last_checkpoint","rb") as f:
+        last_checkpoint = f.readline().decode('utf-8')
+
+    last_checkpoint = os.path.join("output",last_checkpoint)
+    print(f"Load model weights from {last_checkpoint}")
+    DetectionCheckpointer(model).load(last_checkpoint)
 
     # If the input contains a single glob pattern (e.g., "*.jpg"),
     # expand it into a list of matching file paths.

@@ -22,6 +22,7 @@ import time
 from tqdm import tqdm
 import argparse
 
+DIM = 512
 
 def preprocess_annotation(json_path, save_path, num_corners, is_training=True):
     """
@@ -101,7 +102,7 @@ def preprocess_annotation(json_path, save_path, num_corners, is_training=True):
         gt_pts = np.concatenate((gt_pts[ind:], gt_pts[:ind]), axis=0)
 
         # Clip the polygon vertices to a valid range
-        gt_pts = np.clip(gt_pts.flatten(), 0.0, 300 - 1e-4)  # shape, (N * 2), float64
+        gt_pts = np.clip(gt_pts.flatten(), 0.0, DIM - 1e-4)  # shape, (N * 2), float64
 
         # If training, apply polygon padding and generate corner classification
         if is_training:
@@ -150,7 +151,7 @@ def uniform_sampling(gt_pts, num_corners):
     # Create a binary mask for the polygon
     polygon = np.round(gt_pts).astype(np.int32)
     polygon = polygon.reshape((-1, 1, 2))
-    img = np.zeros((301, 301), dtype="uint8")
+    img = np.zeros((DIM+1, DIM+1), dtype="uint8")
     img = cv2.polylines(img, [polygon], True, 255, 1)
     img = cv2.fillPoly(img, [polygon], 255)
 
@@ -203,8 +204,8 @@ def get_gt_bboxes(gt_pts):
     # Enlarge the bounding box by 10% on all sides
     xmin = max(xmin - w * 0.1, 0.0)
     ymin = max(ymin - h * 0.1, 0.0)
-    xmax = min(xmax + w * 0.1, 300 - 1e-4)
-    ymax = min(ymax + h * 0.1, 300 - 1e-4)
+    xmax = min(xmax + w * 0.1, DIM - 1e-4)
+    ymax = min(ymax + h * 0.1, DIM - 1e-4)
 
     w = xmax - xmin
     h = ymax - ymin
@@ -246,17 +247,33 @@ def parse_args():
     Parse command-line arguments.
     """
     parser = argparse.ArgumentParser(description="Preprocess COCO-format annotations for polygon padding and cleaning.")
-    parser.add_argument('--json_path', required=True, help="Path to the input annotation file (JSON format).")
-    parser.add_argument('--save_path', required=True, help="Path to save the preprocessed annotation file.")
+    # parser.add_argument('--json_path',
+    #                     default='/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512',
+    #                     help="Path to the input annotation file (JSON format).")
+    # parser.add_argument('--save_path',
+    #                     default='/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512',
+    #                     help="Path to save the preprocessed annotation file.")
     parser.add_argument('--is_training', type=bool, default=True,
                         help="Whether the dataset is for training (default: True).")
-    parser.add_argument('--num_corners', type=int, required=True, help="Number of vertices to sample from the polygon.")
+    parser.add_argument('--num_corners', type=int,
+                        default = 96,
+                        help="Number of vertices to sample from the polygon.")
 
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = parse_args()
+
+    data_path = "/data/rsulzer/hisup_data/lidarpoly"
+    # data_path = "/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512"
+
+    split = "train"
+    split = "val"
+    args.json_path = os.path.join(data_path,f"annotations_{split}.json")
+    args.save_path = os.path.join(data_path,f"annotations_polyrcnn_{split}.json")
+
+
     preprocess_annotation(
         json_path=args.json_path,
         save_path=args.save_path,

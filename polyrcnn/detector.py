@@ -104,6 +104,8 @@ class PolyRCNN(nn.Module):
                 * file_name: "./datasets/AIcrowd/train/images/....jpg"
         """
 
+        # TODO: here is the main forward pass. I will need to adjust this for adding pcd data
+
         images, images_whwh = self.preprocess_image(batched_inputs)  # images_whwh: torch.Tensor of shape [batch_size, 4], [[width, height, width, height], ...]
         if isinstance(images, (list, torch.Tensor)):  # False
             images = nested_tensor_from_tensor_list(images)

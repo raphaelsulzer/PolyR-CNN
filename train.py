@@ -8,7 +8,7 @@ import time
 from typing import Any, Dict, List, Set
 import logging
 from collections import OrderedDict
-
+import wandb
 import torch
 
 import detectron2.utils.comm as comm
@@ -144,9 +144,16 @@ def main(args):
     # - `dataset_name`: The name of the dataset to register.
     # - `TRAIN_JSON`: Path to the COCO-format annotation file for the dataset.
     # - `TRAIN_PATH`: Path to the folder containing the dataset images.
-    register_my_dataset(dataset_name="aicrowd_train",
-                        TRAIN_JSON="../../data/aicrowd/train/annotation_preprocessed.json",
-                        TRAIN_PATH="../../data/aicrowd/train/images")
+    data_path = "/data/rsulzer/hisup_data/lidarpoly"
+    # data_path = "/home/rsulzer/data/LIDAR_POLY/Switzerland/processed_512"
+    register_my_dataset(dataset_name="inria_train",
+                        TRAIN_JSON=os.path.join(data_path,"annotations_polyrcnn_train.json"),
+                        TRAIN_PATH=data_path)
+
+    register_my_dataset(dataset_name="inria_val",
+                        TRAIN_JSON=os.path.join(data_path,"annotations_polyrcnn_val.json"),
+                        TRAIN_PATH=data_path)
+
     if args.eval_only:
         model = Trainer.build_model(cfg)
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
@@ -158,13 +165,33 @@ def main(args):
         return res
 
     trainer = Trainer(cfg)
-    trainer.resume_or_load(resume=True)
+    trainer.resume_or_load(resume=args.resume_training)
     return trainer.train()
 
 
 if __name__ == "__main__":
-    args = default_argument_parser().parse_args()
+
+    run_name = "image_only_resnet50"
+    group_name = "v1_polyrcnn"
+
+
+    parser = default_argument_parser()
+    parser.add_argument("--log-to-wandb", type=bool, default=False, help="Log run to Weights and Biases")
+    parser.add_argument("--resume-training", type=bool, default=False, help="Resume previous training run")
+
+    args = parser.parse_args()
+    args.config_file = "configs/polyrcnn.res50.100pro.inria.yaml"
     print("Command Line Args:", args)
+
+    if args.log_to_wandb:
+        wandb.init(
+            project="HiSup",
+            name=run_name,
+            group=group_name,
+            sync_tensorboard=True,
+            settings=wandb.Settings(start_method="thread", console="off")
+        )
+
     launch(
         main,
         args.num_gpus,

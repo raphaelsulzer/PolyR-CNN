@@ -111,6 +111,14 @@ class PolyRCNNDatasetMapper:
             # - instances.gt_masks: <torch.Tensor>, torch.int32, shape (N, num_corners*2), preprocessed and uniformly sampled polygon vertices
             dataset_dict["instances"] = filter_empty_instances(instances)
 
+        # from lidar_poly_dataloader.utils import plot_polygons
+        #
+        # M = int(dataset_dict['instances'].gt_masks.shape[1]/2)
+        # pts = dataset_dict['instances'].gt_masks
+        # pts = pts.reshape(dataset_dict['instances'].gt_masks.shape[0], M, 2)
+        #
+        # plot_polygons(pts, image, pointsize=1, linewidth=0.5)
+
         return dataset_dict
 
 # The following functions are a rewritten version of the original functions from detectron2.
@@ -150,7 +158,9 @@ def annotations_to_instances(annos, image_size, num_corners):
 
     if len(annos):
         cor_cls_img = [obj["cor_cls_poly"] for obj in annos]
-        cor_cls_img = torch.tensor(cor_cls_img, dtype=torch.int32)
+        # cor_cls_img = torch.tensor(cor_cls_img, dtype=torch.int32)
+        # RS: avoid torch warning that list of np arrays to tensor is slow
+        cor_cls_img = torch.tensor(np.array(cor_cls_img), dtype=torch.int32)
         target.gt_cor_cls_img = cor_cls_img  # torch.Size([N, num_corners]), torch.int32
     else:
         target.gt_cor_cls_img = torch.zeros((0, num_corners), dtype=torch.int32)

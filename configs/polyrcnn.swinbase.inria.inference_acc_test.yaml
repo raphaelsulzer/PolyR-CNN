@@ -1,5 +1,5 @@
 _BASE_: "polyrcnn.swinbase.inria.yaml"
 MODEL:
-  WEIGHTS: "output/model.pth"
+  WEIGHTS: "output/model_0003409.pth"
 DATASETS:
   TEST: ("inria_val",)
