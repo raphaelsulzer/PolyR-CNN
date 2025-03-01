@@ -85,12 +85,3 @@ RETVAL=$?  # Capture return code
 if [ $RETVAL -eq 0 ]; then
     echo "PyTorch cuda is working!"
 fi
-
-# problem with torch:tms? do this:
-# https://github.com/huggingface/diffusers/issues/8958#issuecomment-2253055261
-
-## for lidar_poly_dataloader
-#conda install conda-forge::gcc_linux-64=10 conda-forge::gxx_linux-64=10 -y # otherwise copclib install bugs
-#pip install copclib
-#conda install conda-forge::colorlog -y
-#conda install conda-forge::descartes=1.1.0 -y

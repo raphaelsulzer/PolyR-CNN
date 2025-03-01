@@ -174,10 +174,9 @@ if __name__ == "__main__":
     run_name = "image_only_resnet50"
     group_name = "v1_polyrcnn"
 
-
     parser = default_argument_parser()
-    parser.add_argument("--log-to-wandb", type=bool, default=False, help="Log run to Weights and Biases")
-    parser.add_argument("--resume-training", type=bool, default=False, help="Resume previous training run")
+    parser.add_argument('--log-to-wandb', action="store_true", help="Enable Weights and Biases logging")
+    parser.add_argument('--resume-training', action="store_true", help="Resume training from last_checkpoint")
 
     args = parser.parse_args()
     args.config_file = "configs/polyrcnn.res50.100pro.inria.yaml"
